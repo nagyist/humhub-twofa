@@ -9,6 +9,7 @@
 namespace humhub\modules\twofa;
 
 use humhub\components\Controller;
+use humhub\helpers\ControllerHelper;
 use humhub\modules\admin\controllers\UserController as AdminUserController;
 use humhub\modules\admin\permissions\ManageUsers;
 use humhub\modules\twofa\events\BeforeCheck;
@@ -18,6 +19,7 @@ use humhub\modules\ui\menu\MenuLink;
 use humhub\modules\user\controllers\AuthController;
 use humhub\modules\user\events\UserEvent;
 use humhub\modules\user\widgets\AccountMenu;
+use humhub\modules\user\widgets\AccountSettingsMenu;
 use Yii;
 
 class Events
@@ -118,14 +120,17 @@ class Events
         }
 
         $menuRoute = explode('/', trim(TwofaUrl::ROUTE_USER_SETTINGS, '/'));
-        $isActiveMenu = MenuLink::isActiveState($menuRoute[0], $menuRoute[1]);
+        $isActiveMenu = ControllerHelper::isActivePath($menuRoute[0], $menuRoute[1]);
 
-        $event->sender->addItem([
+        /* @var AccountSettingsMenu $menu */
+        $menu = $event->sender;
+
+        $menu->addEntry(new MenuLink([
             'label' => Yii::t('TwofaModule.base', 'Two-Factor Authentication'),
             'url' => Yii::$app->user->identity->createUrl(TwofaUrl::ROUTE_USER_SETTINGS),
             'isActive' => $isActiveMenu,
             'sortOrder' => 300,
-        ]);
+        ]));
 
         if ($isActiveMenu) {
             AccountMenu::markAsActive('account-settings-settings');

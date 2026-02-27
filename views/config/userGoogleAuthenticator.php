@@ -8,7 +8,7 @@
 
 use humhub\modules\twofa\drivers\GoogleAuthenticatorDriver;
 use humhub\modules\twofa\models\GoogleAuthenticatorUserSettings;
-use humhub\widgets\bootstrap\Button;
+use humhub\widgets\bootstrap\Link;
 use humhub\widgets\form\ActiveForm;
 
 /* @var $driver GoogleAuthenticatorDriver */
@@ -20,13 +20,13 @@ use humhub\widgets\form\ActiveForm;
     <?= $driver->getQrCodeSecretKeyFile(['requirePinCode' => $requirePinCode]) ?>
 </div>
 
-<div id="twofaGoogleAuthPinCode"<?= $requirePinCode ? '' : ' style="display:none"' ?>>
+<div id="twofaGoogleAuthPinCode"<?= $requirePinCode ? '' : ' class="d-none"' ?>>
     <?= $form->field($model, 'pinCode') ?>
     <?= $form->field($model, 'changeSecretCode')->hiddenInput()->label(false) ?>
 </div>
 
 <div class="mb-3">
-    <?= Button::asLink(Yii::t('TwofaModule.base', 'Request new code'))
+    <?= Link::to(Yii::t('TwofaModule.base', 'Request new code'))
         ->icon('fa-qrcode')
         ->right()
         ->action('twofa.callDriverAction', Yii::$app->user->identity->createUrl('/twofa/user-settings/driver-action'))

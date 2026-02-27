@@ -166,7 +166,7 @@ abstract class BaseDriver extends BaseObject
         ], $params);
 
         echo '<div data-driver-fields="' . static::class . '"'
-            . ($params['activeDriverClassName'] == static::class ? '' : ' style="display:none"') . '>';
+            . ($params['activeDriverClassName'] == static::class ? '' : ' class="d-none"') . '>';
 
         echo $this->renderFile($params);
 

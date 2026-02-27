@@ -24,8 +24,8 @@ use humhub\widgets\form\ActiveForm;
         <?php $form = ActiveForm::begin(['id' => 'configure-form']); ?>
 
         <div id="disabledDriversInfo"
-             class="alert alert-warning"<?= empty($model->enabledDrivers) ? '' : ' style="display:none"' ?>>
-            <i class="fa fa-info-circle"></i>
+             class="alert alert-warning<?= empty($model->enabledDrivers) ? '' : ' d-none' ?>">
+            <i class="fa fa-info-circle" aria-hidden="true"></i>
             <?= Yii::t('TwofaModule.base', 'This module is disabled because no drivers are selected, however users from the enforced groups always fallback to {defaultDriverName} driver by default.', [
                 'defaultDriverName' => $defaultDriverName
             ]) ?>
