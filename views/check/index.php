@@ -9,6 +9,8 @@
 use humhub\helpers\Html;
 use humhub\modules\twofa\drivers\BaseDriver;
 use humhub\modules\twofa\models\CheckCode;
+use humhub\widgets\bootstrap\Button;
+use humhub\widgets\bootstrap\Link;
 use humhub\widgets\form\ActiveForm;
 use humhub\widgets\SiteLogo;
 
@@ -42,13 +44,17 @@ $this->pageTitle = Yii::t('TwofaModule.base', 'Two-Factor Authentication');
                         ->label(Yii::t('TwofaModule.base', 'Remember this browser for {0} days', [$rememberDays])) ?>
                 <?php endif; ?>
 
-                <br/>
-                <?= Html::submitButton(Yii::t('TwofaModule.base', 'Verify'), ['id' => 'verify-button', 'class' => 'btn btn-primary', 'data-ui-loader' => ""]); ?>
+                <br>
+                <?= Button::save(Yii::t('TwofaModule.base', 'Verify'))
+                    ->id('verify-button')
+                    ->submit() ?>
+
+                <?= Link::to(Yii::t('TwofaModule.base', 'Log out'))
+                    ->post(['/user/auth/logout'])
+                    ->right()
+                    ->cssClass('mt-2') ?>
 
                 <?php ActiveForm::end(); ?>
-
-                <?= Html::a(Yii::t('TwofaModule.base', 'Log out'), ['/user/auth/logout'],
-                    ['data-method' => 'POST', 'class' => 'float-end', 'data-pjax-prevent' => true]) ?>
             </div>
         </div>
     </div>
