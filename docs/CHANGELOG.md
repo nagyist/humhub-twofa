@@ -8,7 +8,7 @@ Changelog
 - Enh #87: Implemented `module-coding-standards`
 - Fix #90: Use `MailStyleHelper` for safe email inline styling
 - Fix #98: Remove deprecations
-- Enh #--: Add admin action to reset 2FA for a user
+- Enh #100: Add admin action to reset 2FA for a user
 
 1.2.0 (August 27, 2025)
 -----------------------
