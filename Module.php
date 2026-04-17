@@ -17,6 +17,7 @@ use humhub\modules\twofa\helpers\TwofaHelper;
 use humhub\modules\twofa\helpers\TwofaUrl;
 use humhub\modules\user\models\Group;
 use Yii;
+use yii\helpers\Url;
 
 /**
  * @inheritdoc
@@ -41,7 +42,7 @@ class Module extends BaseModule
      */
     public function getConfigUrl()
     {
-        return TwofaUrl::toConfig();
+        return Url::to(['/twofa/admin/index']);
     }
 
     /**

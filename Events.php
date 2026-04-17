@@ -16,6 +16,7 @@ use humhub\modules\twofa\events\BeforeCheck;
 use humhub\modules\twofa\helpers\TwofaHelper;
 use humhub\modules\twofa\helpers\TwofaUrl;
 use humhub\modules\ui\menu\MenuLink;
+use humhub\modules\user\models\User;
 use humhub\modules\user\controllers\AuthController;
 use humhub\modules\user\events\UserEvent;
 use humhub\modules\user\widgets\AccountMenu;
@@ -135,5 +136,11 @@ class Events
         if ($isActiveMenu) {
             AccountMenu::markAsActive('account-settings-settings');
         }
+    }
+
+    public static function canResetUser(User $user): bool
+    {
+        return Yii::$app->user->can(ManageUsers::class)
+            && (Yii::$app->user->isAdmin() || !$user->isSystemAdmin());
     }
 }
