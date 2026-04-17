@@ -42,7 +42,7 @@ class Module extends BaseModule
      */
     public function getConfigUrl()
     {
-        return Url::to(['/twofa/admin/index']);
+        return TwofaUrl::toConfig();;
     }
 
     /**
