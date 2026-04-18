@@ -10,6 +10,7 @@ namespace humhub\modules\twofa;
 
 use humhub\components\Controller;
 use humhub\helpers\ControllerHelper;
+use humhub\modules\admin\grid\UserActionColumn;
 use humhub\modules\admin\controllers\UserController as AdminUserController;
 use humhub\modules\admin\permissions\ManageUsers;
 use humhub\modules\twofa\events\BeforeCheck;
@@ -135,6 +136,50 @@ class Events
 
         if ($isActiveMenu) {
             AccountMenu::markAsActive('account-settings-settings');
+        }
+    }
+
+    public static function onUserActionColumnAfterInitActions($event): void
+    {
+        if (!Yii::$app->user->can(ManageUsers::class)) {
+            return;
+        }
+
+        /** @var UserActionColumn $actionColumn */
+        $actionColumn = $event->sender;
+
+        if (empty($actionColumn->actions) || !is_array($actionColumn->actions)) {
+            return;
+        }
+
+        $resetLabel = Yii::t('TwofaModule.base', 'Reset two-factor authentication');
+        if (isset($actionColumn->actions[$resetLabel])) {
+            return;
+        }
+
+        $actions = [];
+        $inserted = false;
+
+        foreach ($actionColumn->actions as $actionTitle => $action) {
+            $actions[$actionTitle] = $action;
+
+            if (!$inserted && $actionTitle === Yii::t('base', 'Edit')) {
+                $actions[$resetLabel] = [
+                    '/twofa/admin/reset-user',
+                    'returnUrl' => Yii::$app->request->url,
+                    'linkOptions' => [
+                        'data-action-method' => 'post',
+                        'data-action-confirm-header' => Yii::t('TwofaModule.base', '<strong>Confirm</strong> two-factor authentication reset'),
+                        'data-action-confirm' => Yii::t('TwofaModule.base', 'This will remove the current two-factor authentication setup for this user. They will need to configure it again on the next login.'),
+                        'data-action-confirm-text' => $resetLabel,
+                    ],
+                ];
+                $inserted = true;
+            }
+        }
+
+        if ($inserted) {
+            $actionColumn->actions = $actions;
         }
     }
 
