@@ -9,6 +9,7 @@
 namespace humhub\modules\twofa\models;
 
 use humhub\modules\twofa\drivers\BaseDriver;
+use humhub\modules\twofa\drivers\GoogleAuthenticatorDriver;
 use humhub\modules\twofa\helpers\TwofaHelper;
 use humhub\modules\twofa\Module;
 use humhub\widgets\form\ActiveForm;
@@ -137,7 +138,15 @@ class UserSettings extends Model
      */
     public function save()
     {
-        return TwofaHelper::setSetting(TwofaHelper::USER_SETTING, $this->driver);
+        if (!TwofaHelper::setSetting(TwofaHelper::USER_SETTING, $this->driver)) {
+            return false;
+        }
+
+        if ($this->driver !== GoogleAuthenticatorDriver::class) {
+            return TwofaHelper::setSetting(GoogleAuthenticatorDriver::RECOVERY_CODES_SETTING);
+        }
+
+        return true;
     }
 
     /**

@@ -8,6 +8,7 @@
 
 namespace humhub\modules\twofa\models;
 
+use humhub\modules\twofa\drivers\GoogleAuthenticatorDriver;
 use humhub\modules\twofa\helpers\TwofaHelper;
 use Yii;
 use yii\base\Model;
@@ -27,6 +28,8 @@ class CheckCode extends Model
 
     /** @var string|null */
     public $rememberBrowser;
+
+    private bool $isRecoveryCodeLogin = false;
 
     /**
      * @inheritdoc
@@ -62,7 +65,20 @@ class CheckCode extends Model
     {
         if (TwofaHelper::isCodeExpired()) {
             $this->addError($attribute, self::ERROR_CODE_EXPIRED);
-        } elseif (!TwofaHelper::isValidCode($this->code)) {
+            return;
+        }
+
+        $driver = TwofaHelper::getDriver();
+        if (!$driver) {
+            return;
+        }
+
+        if ($driver instanceof GoogleAuthenticatorDriver && $driver->validateRecoveryCode($this->code)) {
+            $this->isRecoveryCodeLogin = true;
+            return;
+        }
+
+        if (!$driver->checkCode($this->code)) {
             $this->addError($attribute, Yii::t('TwofaModule.base', 'Verifying code is not valid!'));
         }
     }
@@ -77,10 +93,36 @@ class CheckCode extends Model
             return false;
         }
 
+        $driver = TwofaHelper::getDriver();
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            if ($this->isRecoveryCodeLogin) {
+                if (!($driver instanceof GoogleAuthenticatorDriver) || !$driver->consumeRecoveryCode($this->code)) {
+                    $this->addError('code', Yii::t('TwofaModule.base', 'Verifying code is not valid!'));
+                    $transaction->rollBack();
+                    return false;
+                }
+
+                Yii::$app->view->warn(
+                    Yii::t('TwofaModule.base', 'You signed in with a recovery code. Please generate new recovery codes or reconfigure your authenticator app.')
+                );
+            }
+
+            if (!TwofaHelper::disableVerifying()) {
+                throw new \RuntimeException();
+            }
+
+            $transaction->commit();
+        } catch (\Throwable) {
+            $transaction->rollBack();
+            return false;
+        }
+
         if ($this->rememberBrowser) {
             TwofaHelper::rememberBrowser();
         }
 
-        return TwofaHelper::disableVerifying();
+        return true;
     }
 }
