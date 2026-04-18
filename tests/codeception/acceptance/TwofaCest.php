@@ -47,7 +47,7 @@ class TwofaCest
 
     public function testManagerCanResetUserTwoFactorAuthentication(AcceptanceTester $I)
     {
-        $I->wantTo('ensure a user manager can reset configured two-factor authentication from the module admin user list');
+        $I->wantTo('ensure a user manager can reset configured two-factor authentication from the admin user list');
 
         $user = User::findOne(['username' => 'User1']);
         $manager = User::findOne(['username' => 'User2']);
@@ -68,16 +68,17 @@ class TwofaCest
         $I->waitForText('Please sign in');
 
         $I->amUser2();
-        $I->amOnRoute(['/twofa/admin/users']);
-        $I->waitForText('Enabled users');
+        $I->amOnPage('/admin/user/list?UserSearch%5BfreeText%5D=User1');
+        $I->waitForText($user->displayName);
         $I->see($user->displayName, '.table');
-        $I->see('Time-based one-time passwords', '.table');
         $I->dontSee($userWithoutTwofa->displayName, '.table');
-        $I->click('//tr[contains(., "' . addslashes($user->displayName) . '")]//a[contains(normalize-space(.), "Reset")]');
+        $I->click('//tr[contains(., "' . addslashes($user->displayName) . '")]//button[contains(@class, "dropdown-toggle")]');
+        $I->waitForElementVisible('//tr[contains(., "' . addslashes($user->displayName) . '")]//a[contains(normalize-space(.), "Reset two-factor authentication")]', 10);
+        $I->click('//tr[contains(., "' . addslashes($user->displayName) . '")]//a[contains(normalize-space(.), "Reset two-factor authentication")]');
         $I->waitForElementVisible('#globalModalConfirm button[data-modal-confirm]', 10);
         $I->click('button[data-modal-confirm]', '#globalModalConfirm');
         $I->seeSuccess('Two-factor authentication has been reset for this user.');
-        $I->seeCurrentUrlEquals('/twofa/admin/users');
+        $I->seeInCurrentUrl('/admin/user/list');
 
         $this->assertUserHasNoTwofaSettings($I, $user);
 

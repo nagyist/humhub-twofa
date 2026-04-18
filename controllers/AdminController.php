@@ -150,6 +150,11 @@ class AdminController extends Controller
         TwofaHelper::resetUserSettings($user);
         $this->view->success(Yii::t('TwofaModule.base', 'Two-factor authentication has been reset for this user.'));
 
-        return $this->redirect(['users']);
+        $returnUrl = Yii::$app->request->get('returnUrl');
+        if (is_string($returnUrl) && str_starts_with($returnUrl, '/')) {
+            return $this->redirect($returnUrl);
+        }
+
+        return $this->redirect(['/twofa/admin/users']);
     }
 }

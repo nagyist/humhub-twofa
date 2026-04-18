@@ -50,7 +50,7 @@ use yii\grid\DataColumn;
                     $button = Button::danger(Yii::t('TwofaModule.base', 'Reset'))
                         ->outline()
                         ->sm()
-                        ->link(['/twofa/admin/reset-user', 'id' => $user->id], false)
+                        ->link(['/twofa/admin/reset-user', 'id' => $user->id, 'returnUrl' => Yii::$app->request->url], false)
                         ->confirm(
                             Yii::t('TwofaModule.base', '<strong>Confirm</strong> two-factor authentication reset'),
                             Yii::t('TwofaModule.base', 'This will remove the current two-factor authentication setup for this user. They will need to configure it again on the next login.'),
