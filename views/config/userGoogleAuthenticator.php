@@ -7,22 +7,16 @@
  */
 
 use humhub\helpers\Html;
-use humhub\modules\twofa\drivers\GoogleAuthenticatorDriver;
-use humhub\modules\twofa\helpers\TwofaHelper;
 use humhub\modules\twofa\models\GoogleAuthenticatorUserSettings;
 use humhub\widgets\bootstrap\Button;
 use humhub\widgets\bootstrap\Link;
 use humhub\widgets\form\ActiveForm;
 use yii\helpers\Json;
 
-/* @var $driver GoogleAuthenticatorDriver */
+/* @var $driver humhub\modules\twofa\drivers\GoogleAuthenticatorDriver */
 /* @var $form ActiveForm */
 /* @var $model GoogleAuthenticatorUserSettings */
 /* @var $requirePinCode bool */
-
-$showRecoveryCodeSection = !empty($model->generatedRecoveryCodes)
-    || !empty(TwofaHelper::getSetting(GoogleAuthenticatorDriver::SECRET_SETTING));
-$recoveryCodeCount = $driver->getRecoveryCodeCount();
 ?>
 <div id="twofaGoogleAuthCode" class="mb-3">
     <?= $driver->getQrCodeSecretKeyFile(['requirePinCode' => $requirePinCode]) ?>
@@ -45,29 +39,6 @@ $recoveryCodeCount = $driver->getRecoveryCodeCount();
             'data-container' => '#twofaGoogleAuthCode',
         ]) ?>
 </div>
-
-<?php if ($showRecoveryCodeSection): ?>
-    <div class="mb-3">
-        <?php if ($recoveryCodeCount > 0): ?>
-            <div class="alert alert-info">
-                <?= Yii::t('TwofaModule.base', '{count} recovery codes remaining.', ['count' => $recoveryCodeCount]) ?>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-warning">
-                <?= Yii::t('TwofaModule.base', 'You do not have recovery codes yet. Generate them and store them in a safe place.') ?>
-            </div>
-        <?php endif; ?>
-
-        <?= Button::secondary($recoveryCodeCount > 0
-            ? Yii::t('TwofaModule.base', 'Regenerate recovery codes')
-            : Yii::t('TwofaModule.base', 'Generate recovery codes'))
-            ->submit()
-            ->options([
-                'name' => 'GoogleAuthenticatorUserSettings[regenerateRecoveryCodes]',
-                'value' => 1,
-            ]) ?>
-    </div>
-<?php endif; ?>
 
 <?php if (!empty($model->generatedRecoveryCodes)): ?>
     <div id="twofaRecoveryCodesGenerated" class="alert alert-warning">

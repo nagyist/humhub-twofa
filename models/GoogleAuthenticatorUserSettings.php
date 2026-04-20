@@ -29,11 +29,6 @@ class GoogleAuthenticatorUserSettings extends Model
     public $changeSecretCode;
 
     /**
-     * @var bool Generate a new recovery code set?
-     */
-    public $regenerateRecoveryCodes = false;
-
-    /**
      * @var string[] Recovery codes shown only in the current response
      */
     public $generatedRecoveryCodes = [];
@@ -49,7 +44,6 @@ class GoogleAuthenticatorUserSettings extends Model
                 return $model->changeSecretCode;
             }],
             ['changeSecretCode', 'boolean'],
-            ['regenerateRecoveryCodes', 'boolean'],
         ];
 
         $postParams = Yii::$app->request->post('GoogleAuthenticatorUserSettings');
@@ -125,8 +119,7 @@ class GoogleAuthenticatorUserSettings extends Model
     {
         $this->generatedRecoveryCodes = [];
 
-        if (empty(TwofaHelper::getSetting(GoogleAuthenticatorDriver::SECRET_SETTING))
-            || (!$generateInitialRecoveryCodes && !$this->regenerateRecoveryCodes)) {
+        if (empty(TwofaHelper::getSetting(GoogleAuthenticatorDriver::SECRET_SETTING)) || !$generateInitialRecoveryCodes) {
             return true;
         }
 
@@ -137,7 +130,6 @@ class GoogleAuthenticatorUserSettings extends Model
         }
 
         $this->generatedRecoveryCodes = $generatedRecoveryCodes;
-        $this->regenerateRecoveryCodes = false;
 
         return true;
     }

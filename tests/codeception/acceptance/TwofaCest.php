@@ -116,15 +116,14 @@ class TwofaCest
 
         $I->waitForText('These recovery codes are shown only once.');
         $I->see('Download recovery codes');
-        $I->see('Regenerate recovery codes');
         Assert::assertSame(8, $this->getRecoveryCodeCount($user));
         Assert::assertSame(GoogleAuthenticatorDriver::class, $this->getUserSetting($user, TwofaHelper::USER_SETTING));
         Assert::assertNotNull($this->getUserSetting($user, GoogleAuthenticatorDriver::SECRET_SETTING));
 
         $I->amOnPage('/twofa/user-settings');
         $I->waitForText('Authentication method');
-        $I->see('8 recovery codes remaining.');
         $I->dontSee('These recovery codes are shown only once.');
+        $I->dontSee('Download recovery codes');
     }
 
     private function configureGoogleAuthenticator(User $user, array $recoveryCodes = []): void
