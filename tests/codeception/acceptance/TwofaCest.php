@@ -137,7 +137,7 @@ class TwofaCest
         if (!empty($recoveryCodes)) {
             $settings->set(
                 GoogleAuthenticatorDriver::RECOVERY_CODES_SETTING,
-                json_encode(array_map(static fn(string $recoveryCode) => Yii::$app->security->generatePasswordHash($recoveryCode), $recoveryCodes))
+                json_encode(array_map(static fn(string $recoveryCode) => Yii::$app->security->generatePasswordHash($recoveryCode), $recoveryCodes)),
             );
         }
 

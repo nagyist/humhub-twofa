@@ -105,7 +105,7 @@ class CheckCode extends Model
                 }
 
                 Yii::$app->view->warn(
-                    Yii::t('TwofaModule.base', 'You signed in with a recovery code. Please generate new recovery codes or reconfigure your authenticator app.')
+                    Yii::t('TwofaModule.base', 'You signed in with a recovery code. Please generate new recovery codes or reconfigure your authenticator app.'),
                 );
             }
 
