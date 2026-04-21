@@ -9,6 +9,7 @@ Changelog
 - Fix #90: Use `MailStyleHelper` for safe email inline styling
 - Fix #98: Remove deprecations
 - Enh #100: Add admin action to reset 2FA for a user
+- Enh #101: Add recovery codes
 
 1.2.0 (August 27, 2025)
 -----------------------

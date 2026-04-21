@@ -29,13 +29,20 @@ class GoogleAuthenticatorUserSettings extends Model
     public $changeSecretCode;
 
     /**
+     * @var string[] Recovery codes shown only in the current response
+     */
+    public $generatedRecoveryCodes = [];
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
         $rules = [
             ['pinCode', 'string'],
-            ['pinCode', 'verifyPinCode'],
+            ['pinCode', 'verifyPinCode', 'when' => static function (self $model) {
+                return $model->changeSecretCode;
+            }],
             ['changeSecretCode', 'boolean'],
         ];
 
@@ -74,7 +81,11 @@ class GoogleAuthenticatorUserSettings extends Model
      */
     public function save()
     {
-        return $this->updateSecretCode();
+        $generateInitialRecoveryCodes = $this->changeSecretCode
+            && empty(TwofaHelper::getSetting(GoogleAuthenticatorDriver::SECRET_SETTING));
+
+        return $this->updateSecretCode()
+            && $this->updateRecoveryCodes($generateInitialRecoveryCodes);
     }
 
     /**
@@ -102,6 +113,25 @@ class GoogleAuthenticatorUserSettings extends Model
         }
 
         return false;
+    }
+
+    protected function updateRecoveryCodes(bool $generateInitialRecoveryCodes): bool
+    {
+        $this->generatedRecoveryCodes = [];
+
+        if (empty(TwofaHelper::getSetting(GoogleAuthenticatorDriver::SECRET_SETTING)) || !$generateInitialRecoveryCodes) {
+            return true;
+        }
+
+        $driver = new GoogleAuthenticatorDriver();
+        $generatedRecoveryCodes = $driver->generateAndStoreRecoveryCodes();
+        if ($generatedRecoveryCodes === false) {
+            return false;
+        }
+
+        $this->generatedRecoveryCodes = $generatedRecoveryCodes;
+
+        return true;
     }
 
 }

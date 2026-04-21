@@ -11,11 +11,13 @@ namespace humhub\modules\twofa\tests\codeception\acceptance;
 use humhub\libs\BasePermission;
 use humhub\modules\admin\permissions\ManageUsers;
 use humhub\modules\twofa\drivers\GoogleAuthenticatorDriver;
+use humhub\modules\twofa\Events;
 use humhub\modules\twofa\helpers\TwofaHelper;
 use humhub\modules\user\components\PermissionManager;
 use humhub\modules\user\models\GroupUser;
 use humhub\modules\user\models\User;
 use PHPUnit\Framework\Assert;
+use Sonata\GoogleAuthenticator\GoogleAuthenticator;
 use tests\codeception\_pages\LoginPage;
 use twofa\AcceptanceTester;
 use Yii;
@@ -39,7 +41,8 @@ class TwofaCest
         $I->amGoingTo('try to login with non-admin credentials');
         $loginPage->login('User1', 'user^humhub@PASS%worD!');
         $I->expectTo('see dashboard');
-        $I->waitForText('User 2 Space 2 Post Public');
+        $I->waitForElementVisible('#wallStream');
+        $I->seeCurrentUrlEquals('/dashboard');
     }
 
     public function testManagerCanResetUserTwoFactorAuthentication(AcceptanceTester $I)
@@ -50,7 +53,7 @@ class TwofaCest
         $manager = User::findOne(['username' => 'User2']);
         $userWithoutTwofa = User::findOne(['username' => 'User3']);
 
-        $this->configureGoogleAuthenticator($user);
+        $this->configureGoogleAuthenticator($user, ['RESETREC01']);
         $this->allowManageUsers($manager);
 
         Yii::$app->user->logout();
@@ -88,13 +91,57 @@ class TwofaCest
         $I->dontSee('Two-factor authentication');
     }
 
-    private function configureGoogleAuthenticator(User $user): void
+    public function testGeneratesRecoveryCodes(AcceptanceTester $I)
     {
+        $I->wantTo('ensure the initial Google Authenticator setup immediately generates recovery codes');
+
+        $user = User::findOne(['username' => 'User1']);
+        $this->resetTwofaSettings($user);
+
+        $I->amUser1();
+        $I->amOnPage('/twofa/user-settings');
+        $I->waitForText('Authentication method');
+
+        Events::registerAutoloader();
+
+        $tempSecret = $this->getUserSetting($user, GoogleAuthenticatorDriver::SECRET_TEMP_SETTING);
+        Assert::assertNotEmpty($tempSecret);
+
+        $I->selectOption('#usersettings-driver', GoogleAuthenticatorDriver::class);
+        $I->executeJS("$('#usersettings-driver').trigger('change');");
+        $I->waitForElementVisible('#googleauthenticatorusersettings-pincode');
+        $I->fillField('GoogleAuthenticatorUserSettings[pinCode]', (new GoogleAuthenticator())->getCode($tempSecret));
+        $I->scrollTo('button.btn-primary');
+        $I->jsClick('button.btn-primary');
+
+        $I->waitForText('These recovery codes are shown only once.');
+        $I->see('Download recovery codes');
+        Assert::assertSame(8, $this->getRecoveryCodeCount($user));
+        Assert::assertSame(GoogleAuthenticatorDriver::class, $this->getUserSetting($user, TwofaHelper::USER_SETTING));
+        Assert::assertNotNull($this->getUserSetting($user, GoogleAuthenticatorDriver::SECRET_SETTING));
+
+        $I->amOnPage('/twofa/user-settings');
+        $I->waitForText('Authentication method');
+        $I->dontSee('These recovery codes are shown only once.');
+        $I->dontSee('Download recovery codes');
+    }
+
+    private function configureGoogleAuthenticator(User $user, array $recoveryCodes = []): void
+    {
+        $this->resetTwofaSettings($user);
+
         $settings = TwofaHelper::getSettings($user);
         $settings->set(TwofaHelper::USER_SETTING, GoogleAuthenticatorDriver::class);
         $settings->set(GoogleAuthenticatorDriver::SECRET_SETTING, 'JBSWY3DPEHPK3PXP');
 
-        Yii::$app->getModule('user')->settings->flushContentContainer($user);
+        if (!empty($recoveryCodes)) {
+            $settings->set(
+                GoogleAuthenticatorDriver::RECOVERY_CODES_SETTING,
+                json_encode(array_map(static fn(string $recoveryCode) => Yii::$app->security->generatePasswordHash($recoveryCode), $recoveryCodes))
+            );
+        }
+
+        $this->flushUserSettings($user);
     }
 
     private function allowManageUsers(User $user): void
@@ -107,10 +154,34 @@ class TwofaCest
 
     private function assertUserHasNoTwofaSettings(AcceptanceTester $I, User $user): void
     {
-        Yii::$app->getModule('user')->settings->flushContentContainer($user);
+        $this->flushUserSettings($user);
 
         foreach (TwofaHelper::getUserSettingNames() as $settingName) {
             Assert::assertNull(TwofaHelper::getSettings($user)->get($settingName));
         }
+    }
+
+    private function resetTwofaSettings(User $user): void
+    {
+        Assert::assertTrue(TwofaHelper::resetUserSettings($user));
+    }
+
+    private function getUserSetting(User $user, string $name): ?string
+    {
+        $this->flushUserSettings($user);
+
+        return TwofaHelper::getSettings($user)->get($name);
+    }
+
+    private function getRecoveryCodeCount(User $user): int
+    {
+        $recoveryCodeHashes = json_decode((string) $this->getUserSetting($user, GoogleAuthenticatorDriver::RECOVERY_CODES_SETTING), true);
+
+        return is_array($recoveryCodeHashes) ? count($recoveryCodeHashes) : 0;
+    }
+
+    private function flushUserSettings(User $user): void
+    {
+        Yii::$app->getModule('user')->settings->flushContentContainer($user);
     }
 }

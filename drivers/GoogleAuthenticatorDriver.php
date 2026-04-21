@@ -22,12 +22,14 @@ class GoogleAuthenticatorDriver extends BaseDriver
      */
     public const SECRET_SETTING = 'twofaGoogleAuthSecret';
     public const SECRET_TEMP_SETTING = 'twofaGoogleAuthSecretTemp';
+    public const RECOVERY_CODES_SETTING = 'twofaRecoveryCodes';
 
     public static function getUserSettingNames(): array
     {
         return [
             self::SECRET_SETTING,
             self::SECRET_TEMP_SETTING,
+            self::RECOVERY_CODES_SETTING,
         ];
     }
 
@@ -83,6 +85,11 @@ class GoogleAuthenticatorDriver extends BaseDriver
     {
         if ($this->isActive() && !empty(TwofaHelper::getSetting(self::SECRET_SETTING))) {
             parent::beforeCheckCodeFormInput($form, $model);
+            if ($this->getRecoveryCodeCount() > 0) {
+                echo '<p class="text-body-secondary">'
+                    . Yii::t('TwofaModule.base', 'You can also enter one of your recovery codes if you lost access to your authenticator app.')
+                    . '</p>';
+            }
             return;
         }
 
@@ -224,5 +231,78 @@ class GoogleAuthenticatorDriver extends BaseDriver
         $params['secret'] = $secret;
 
         return $this->renderFile($params, ['suffix' => 'Code']);
+    }
+
+    public function getRecoveryCodeCount(): int
+    {
+        return count($this->getRecoveryCodeHashes());
+    }
+
+    /**
+     * @return array|false
+     */
+    public function generateAndStoreRecoveryCodes()
+    {
+        $recoveryCodes = [];
+        $recoveryCodeHashes = [];
+
+        for ($i = 0; $i < 8; $i++) {
+            $recoveryCode = Yii::$app->security->generateRandomString(10);
+            $recoveryCodes[] = $recoveryCode;
+            $recoveryCodeHashes[] = Yii::$app->security->generatePasswordHash($recoveryCode);
+        }
+
+        return TwofaHelper::setSetting(self::RECOVERY_CODES_SETTING, json_encode($recoveryCodeHashes))
+            ? $recoveryCodes
+            : false;
+    }
+
+    public function validateRecoveryCode(string $recoveryCode): bool
+    {
+        if ($recoveryCode === '') {
+            return false;
+        }
+
+        foreach ($this->getRecoveryCodeHashes() as $recoveryCodeHash) {
+            if (Yii::$app->security->validatePassword($recoveryCode, $recoveryCodeHash)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function consumeRecoveryCode(string $recoveryCode): bool
+    {
+        if ($recoveryCode === '') {
+            return false;
+        }
+
+        $recoveryCodeHashes = $this->getRecoveryCodeHashes();
+        foreach ($recoveryCodeHashes as $index => $recoveryCodeHash) {
+            if (!Yii::$app->security->validatePassword($recoveryCode, $recoveryCodeHash)) {
+                continue;
+            }
+
+            unset($recoveryCodeHashes[$index]);
+
+            return TwofaHelper::setSetting(
+                self::RECOVERY_CODES_SETTING,
+                empty($recoveryCodeHashes) ? null : json_encode(array_values($recoveryCodeHashes))
+            );
+        }
+
+        return false;
+    }
+
+    protected function getRecoveryCodeHashes(): array
+    {
+        $recoveryCodeHashes = json_decode((string) TwofaHelper::getSetting(self::RECOVERY_CODES_SETTING), true);
+
+        if (!is_array($recoveryCodeHashes)) {
+            return [];
+        }
+
+        return array_values(array_filter($recoveryCodeHashes, 'is_string'));
     }
 }
