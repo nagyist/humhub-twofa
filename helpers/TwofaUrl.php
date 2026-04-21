@@ -20,7 +20,7 @@ class TwofaUrl extends Url
     /**
      * @var string Route to configure general module settings by admin
      */
-    public const ROUTE_CONFIG = '/twofa/config';
+    public const ROUTE_CONFIG = '/twofa/admin/index';
 
     /**
      * @var string Route to configure user settings by current User

@@ -26,18 +26,18 @@ class TwofaHelper
     public const CODE_EXPIRATION_SETTING = 'twofaCodeExpiration';
 
     /**
-     * Get settings manager of current User
+     * Get settings manager of User
      *
+     * @param User|null $user
      * @return ContentContainerSettingsManager|false
      */
-    public static function getSettings()
+    public static function getSettings(User $user = null)
     {
-        /** @var User $user */
-        $user = Yii::$app->user->getIdentity();
+        $user ??= Yii::$app->user->getIdentity();
         /** @var UserModule $module */
         $module = Yii::$app->getModule('user');
 
-        return $user ? $module->settings->contentContainer($user) : false;
+        return $user instanceof User ? $module->settings->contentContainer($user) : false;
     }
 
     /**
@@ -72,6 +72,50 @@ class TwofaHelper
         }
 
         return true;
+    }
+
+    /**
+     * Reset all stored 2FA settings for the given User.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public static function resetUserSettings(User $user): bool
+    {
+        if (!($settings = self::getSettings($user))) {
+            return false;
+        }
+
+        $modelClass = $settings->modelClass;
+        $modelClass::deleteAll([
+            'module_id' => 'user',
+            'contentcontainer_id' => $user->contentcontainer_id,
+            'name' => self::getUserSettingNames(),
+        ]);
+
+        Yii::$app->getModule('user')->settings->flushContentContainer($user);
+
+        return true;
+    }
+
+    public static function getUserSettingNames(): array
+    {
+        $settingNames = [
+            self::USER_SETTING,
+            self::CODE_SETTING,
+            self::CODE_EXPIRATION_SETTING,
+        ];
+
+        /** @var TwofaModule $module */
+        $module = Yii::$app->getModule('twofa');
+
+        foreach ($module->drivers as $driverClassName) {
+            if (is_subclass_of($driverClassName, BaseDriver::class)) {
+                $settingNames = array_merge($settingNames, $driverClassName::getUserSettingNames());
+            }
+        }
+
+        return array_values(array_unique($settingNames));
     }
 
     /**

@@ -92,6 +92,11 @@ abstract class BaseDriver extends BaseObject
         return $this->isActive();
     }
 
+    public static function getUserSettingNames(): array
+    {
+        return [];
+    }
+
     /**
      * Action before send/generate code
      *

@@ -23,6 +23,14 @@ class GoogleAuthenticatorDriver extends BaseDriver
     public const SECRET_SETTING = 'twofaGoogleAuthSecret';
     public const SECRET_TEMP_SETTING = 'twofaGoogleAuthSecretTemp';
 
+    public static function getUserSettingNames(): array
+    {
+        return [
+            self::SECRET_SETTING,
+            self::SECRET_TEMP_SETTING,
+        ];
+    }
+
     /**
      * @inheritdoc
      */

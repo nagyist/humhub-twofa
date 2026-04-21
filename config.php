@@ -7,6 +7,7 @@
  */
 
 use humhub\components\Application;
+use humhub\modules\admin\grid\UserActionColumn;
 use humhub\modules\twofa\Events;
 use humhub\modules\user\controllers\AuthController;
 use humhub\modules\user\widgets\AccountSettingsMenu;
@@ -22,5 +23,6 @@ return [
         [Controller::class, Controller::EVENT_BEFORE_ACTION, [Events::class, 'onBeforeAction']],
         [Controller::class, Controller::EVENT_AFTER_ACTION, [Events::class, 'onAfterAction']],
         [AccountSettingsMenu::class, AccountSettingsMenu::EVENT_INIT, [Events::class, 'onProfileSettingMenuInit']],
+        [UserActionColumn::class, UserActionColumn::EVENT_AFTER_INIT_ACTIONS, [Events::class, 'onUserActionColumnAfterInitActions']],
     ],
 ];
