@@ -288,7 +288,7 @@ class GoogleAuthenticatorDriver extends BaseDriver
 
             return TwofaHelper::setSetting(
                 self::RECOVERY_CODES_SETTING,
-                empty($recoveryCodeHashes) ? null : json_encode(array_values($recoveryCodeHashes))
+                empty($recoveryCodeHashes) ? null : json_encode(array_values($recoveryCodeHashes)),
             );
         }
 
