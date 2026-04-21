@@ -17,7 +17,7 @@ use humhub\modules\user\components\PermissionManager;
 use humhub\modules\user\models\GroupUser;
 use humhub\modules\user\models\User;
 use PHPUnit\Framework\Assert;
-use Sonata\GoogleAuthenticator\GoogleAuthenticator;
+use PragmaRX\Google2FA\Google2FA;
 use tests\codeception\_pages\LoginPage;
 use twofa\AcceptanceTester;
 use Yii;
@@ -110,7 +110,7 @@ class TwofaCest
         $I->selectOption('#usersettings-driver', GoogleAuthenticatorDriver::class);
         $I->executeJS("$('#usersettings-driver').trigger('change');");
         $I->waitForElementVisible('#googleauthenticatorusersettings-pincode');
-        $I->fillField('GoogleAuthenticatorUserSettings[pinCode]', (new GoogleAuthenticator())->getCode($tempSecret));
+        $I->fillField('GoogleAuthenticatorUserSettings[pinCode]', (new Google2FA())->getCurrentOtp($tempSecret));
         $I->scrollTo('button.btn-primary');
         $I->jsClick('button.btn-primary');
 
