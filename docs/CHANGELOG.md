@@ -3,7 +3,6 @@ Changelog
 
 1.2.1 (Unreleased)
 -----------------------
-- Fix #89: Send a new email code after trusted IP changes in the same session
 - Fix #85: Use Return URL after code verification instead of redirecting to home
 - Enh #86: Improved Module Test GitHub Actions
 - Enh #87: Implemented `module-coding-standards`
@@ -11,6 +10,7 @@ Changelog
 - Fix #98: Remove deprecations
 - Enh #100: Add admin action to reset 2FA for a user
 - Enh #101: Add recovery codes
+- Fix #106: Send a new email code after trusted IP changes in the same session
 
 1.2.0 (August 27, 2025)
 -----------------------
