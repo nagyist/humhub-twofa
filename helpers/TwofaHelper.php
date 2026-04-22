@@ -25,6 +25,10 @@ class TwofaHelper
     public const CODE_SETTING = 'twofaCode';
     public const CODE_EXPIRATION_SETTING = 'twofaCodeExpiration';
 
+    private const SESSION_STATUS = 'twofa.status';
+    private const SESSION_STATUS_PENDING = 'pending';
+    private const SESSION_STATUS_VERIFIED = 'verified';
+
     /**
      * Get settings manager of User
      *
@@ -228,6 +232,31 @@ class TwofaHelper
         return Yii::$app->security->generateRandomString($len);
     }
 
+    public static function resetSessionStatus(): void
+    {
+        Yii::$app->session->remove(self::SESSION_STATUS);
+    }
+
+    private static function setSessionStatus(?string $status): void
+    {
+        if ($status === null) {
+            self::resetSessionStatus();
+            return;
+        }
+
+        Yii::$app->session->set(self::SESSION_STATUS, $status);
+    }
+
+    private static function isPendingVerification(): bool
+    {
+        return Yii::$app->session->get(self::SESSION_STATUS) === self::SESSION_STATUS_PENDING;
+    }
+
+    private static function isSessionVerified(): bool
+    {
+        return Yii::$app->session->get(self::SESSION_STATUS) === self::SESSION_STATUS_VERIFIED;
+    }
+
     /**
      * Enable verifying by 2fa for current User
      *
@@ -263,6 +292,8 @@ class TwofaHelper
             return false;
         }
 
+        self::setSessionStatus(self::SESSION_STATUS_PENDING);
+
         // TODO: Inform user about way of sending the verifying code
 
         return true;
@@ -273,10 +304,15 @@ class TwofaHelper
      *
      * @return bool true on success disabling
      */
-    public static function disableVerifying()
+    public static function disableVerifying(bool $isVerified = false)
     {
-        // Remove the verifying code from DB:
-        return self::setSetting(self::CODE_SETTING);
+        if (!self::setSetting(self::CODE_SETTING) || !self::setSetting(self::CODE_EXPIRATION_SETTING)) {
+            return false;
+        }
+
+        self::setSessionStatus($isVerified ? self::SESSION_STATUS_VERIFIED : null);
+
+        return true;
     }
 
     /**
@@ -289,17 +325,15 @@ class TwofaHelper
     {
         $driver = self::getDriver();
 
-        // if driver is not set up or impossible to send/generate a code
-        if (!$driver || !$driver->canSend()) {
+        if (!$driver || self::isSessionVerified() || !$driver->canSend()) {
             return false;
         }
 
-        // if code is missing for a user
-        if (self::getCode() === null) {
-            return false;
+        if (!self::isPendingVerification()) {
+            return self::enableVerifying() || self::getCode() !== null;
         }
 
-        return true;
+        return self::getCode() !== null || self::enableVerifying();
     }
 
     /**

@@ -95,6 +95,7 @@ class Events
     public static function onAfterAction($event)
     {
         if ($event->sender instanceof AuthController && $event->sender->action->id == 'logout') {
+            TwofaHelper::resetSessionStatus();
             Yii::$app->session->remove('twofa.switchedUserId');
         }
     }
@@ -107,6 +108,7 @@ class Events
      */
     public static function onAfterLogin($event)
     {
+        TwofaHelper::resetSessionStatus();
         TwofaHelper::enableVerifying();
     }
 

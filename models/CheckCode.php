@@ -109,7 +109,7 @@ class CheckCode extends Model
                 );
             }
 
-            if (!TwofaHelper::disableVerifying()) {
+            if (!TwofaHelper::disableVerifying(true)) {
                 throw new \RuntimeException();
             }
 
