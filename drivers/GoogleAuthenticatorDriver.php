@@ -12,7 +12,7 @@ use humhub\modules\twofa\assets\Assets;
 use humhub\modules\twofa\helpers\TwofaHelper;
 use humhub\modules\twofa\models\CheckCode;
 use humhub\widgets\form\ActiveForm;
-use Sonata\GoogleAuthenticator\GoogleAuthenticator;
+use PragmaRX\Google2FA\Google2FA;
 use Yii;
 
 class GoogleAuthenticatorDriver extends BaseDriver
@@ -50,9 +50,7 @@ class GoogleAuthenticatorDriver extends BaseDriver
      */
     public function isInstalled()
     {
-        // Google Authenticator library must be installed for work of this Driver:
-        return class_exists(\Sonata\GoogleAuthenticator\GoogleAuthenticator::class)
-            && class_exists(\Sonata\GoogleAuthenticator\GoogleQrUrl::class);
+        return class_exists(Google2FA::class);
     }
 
     /**
@@ -155,7 +153,7 @@ class GoogleAuthenticatorDriver extends BaseDriver
             }
         }
 
-        $result = $this->getGoogleAuthenticator()->checkCode($correctCode, $verifyingCode);
+        $result = $this->getGoogleAuthenticator()->verifyKey($correctCode, $verifyingCode, 1);
 
         if ($result && $isNewCodeAfterLogin) {
             TwofaHelper::setSetting(TwofaHelper::USER_SETTING, self::class);
@@ -169,12 +167,11 @@ class GoogleAuthenticatorDriver extends BaseDriver
     /**
      * Get Google Authenticator
      *
-     * @return GoogleAuthenticator
+     * @return Google2FA
      */
     protected function getGoogleAuthenticator()
     {
-        // NOTE: Don't try to pass different code length, only default $passCodeLength = 6 can be used here!
-        return new GoogleAuthenticator(/* Yii::$app->getModule('twofa')->getCodeLength() */);
+        return new Google2FA();
     }
 
     /**
@@ -184,7 +181,7 @@ class GoogleAuthenticatorDriver extends BaseDriver
      */
     protected function generateTempSecretCode(): string
     {
-        $secret = $this->getGoogleAuthenticator()->generateSecret();
+        $secret = $this->getGoogleAuthenticator()->generateSecretKey(16);
 
         // Save new generated secret in temporary setting before confirm by pin code:
         TwofaHelper::setSetting(self::SECRET_TEMP_SETTING, $secret);

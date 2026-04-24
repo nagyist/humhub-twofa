@@ -35,7 +35,7 @@ class TwofaHelper
      * @param User|null $user
      * @return ContentContainerSettingsManager|false
      */
-    public static function getSettings(User $user = null)
+    public static function getSettings(?User $user = null)
     {
         $user ??= Yii::$app->user->getIdentity();
         /** @var UserModule $module */

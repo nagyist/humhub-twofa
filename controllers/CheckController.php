@@ -66,6 +66,7 @@ class CheckController extends Controller
         return $this->render('index', [
             'model' => $model, 'driver' => TwofaHelper::getDriver(),
             'rememberDays' => Yii::$app->getModule('twofa')->getRememberMeDays(),
+            'helpText' => Yii::$app->getModule('twofa')->getHelpText(),
         ]);
     }
 

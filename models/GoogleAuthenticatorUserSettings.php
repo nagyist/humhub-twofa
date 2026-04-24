@@ -40,9 +40,7 @@ class GoogleAuthenticatorUserSettings extends Model
     {
         $rules = [
             ['pinCode', 'string'],
-            ['pinCode', 'verifyPinCode', 'when' => static function (self $model) {
-                return $model->changeSecretCode;
-            }],
+            ['pinCode', 'verifyPinCode', 'when' => static fn(self $model) => $model->changeSecretCode],
             ['changeSecretCode', 'boolean'],
         ];
 

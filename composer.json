@@ -14,7 +14,7 @@
     }
   },
   "require": {
-    "sonata-project/google-authenticator": "^2.2"
+    "pragmarx/google2fa": "^9.0"
   },
   "require-dev": {
     "humhub/module-coding-standards": "dev-main"
@@ -24,4 +24,3 @@
     "fixer": "vendor/bin/php-cs-fixer fix --config=vendor/humhub/module-coding-standards/php-cs-fixer.php"
   }
 }
-

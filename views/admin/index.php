@@ -49,6 +49,11 @@ use humhub\widgets\form\ActiveForm;
     <?= Yii::t('TwofaModule.base', 'List of IPs or subnets to whitelist, currently yours is {0}. Use coma separator to create a list, example: "{0}, 127.0.0.1"', [$ip]) ?>
 </div>
 
+<?= $form->field($model, 'helpText')->textarea() ?>
+<div class="text-body-secondary">
+    <?= Yii::t('TwofaModule.base', 'Optional text shown on the two-factor authentication screen.') ?>
+</div>
+
 <?= Button::save()->submit() ?>
 
 <?php $form::end(); ?>

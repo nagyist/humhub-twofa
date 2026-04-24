@@ -18,6 +18,7 @@ use humhub\widgets\SiteLogo;
  * @var $model CheckCode
  * @var $driver BaseDriver
  * @var $rememberDays string
+ * @var $helpText string
  */
 
 $this->pageTitle = Yii::t('TwofaModule.base', 'Two-Factor Authentication');
@@ -42,6 +43,12 @@ $this->pageTitle = Yii::t('TwofaModule.base', 'Two-Factor Authentication');
                 <?php if ($rememberDays): ?>
                     <?= $form->field($model, 'rememberBrowser')->checkbox()
                         ->label(Yii::t('TwofaModule.base', 'Remember this browser for {0} days', [$rememberDays])) ?>
+                <?php endif; ?>
+
+                <?php if ($helpText !== ''): ?>
+                    <div class="small text-body-secondary mb-3">
+                        <?= nl2br(Html::encode($helpText)) ?>
+                    </div>
                 <?php endif; ?>
 
                 <br>
