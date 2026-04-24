@@ -11,6 +11,7 @@ Changelog
 - Enh #100: Add admin action to reset 2FA for a user
 - Enh #101: Add recovery codes
 - Enh #104: replace abandoned Google Auth library
+- Enh: Automated code refactoring for HumHub 1.18.0-beta.6 using Rector
 
 1.2.0 (August 27, 2025)
 -----------------------
