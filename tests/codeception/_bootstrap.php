@@ -34,3 +34,8 @@ $globalConfig = require $humhubPath . '/protected/humhub/tests/codeception/_load
 
 // Load default test bootstrap (initialize Yii...)
 require $globalConfig['humhub_root'] . '/protected/humhub/tests/codeception/_bootstrap.php';
+
+// Ensure test app is considered installed on newer HumHub versions.
+if (\Yii::$app !== null && \Yii::$app->has('installationState')) {
+    \Yii::$app->installationState->setInstalled();
+}

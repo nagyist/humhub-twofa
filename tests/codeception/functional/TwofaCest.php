@@ -11,12 +11,14 @@ namespace twofa\functional;
 use tests\codeception\_pages\LoginPage;
 use tests\codeception\_pages\TwofaAuthPage;
 use twofa\FunctionalTester;
+use Yii;
 
 class TwofaCest
 {
     public function testCheckWrongVerifyingCode(FunctionalTester $I)
     {
         $I->wantTo('check wrong verifying code');
+        Yii::$app->installationState->setInstalled();
         $loginPage = LoginPage::openBy($I);
         $I->amGoingTo('try to login with admin credentials');
         $loginPage->login('Admin', 'admin&humhub@PASS%worD!');
@@ -32,6 +34,7 @@ class TwofaCest
     public function testVerifyCodeFromEmail(FunctionalTester $I)
     {
         $I->wantTo('verify code from email');
+        Yii::$app->installationState->setInstalled();
         $loginPage = LoginPage::openBy($I);
         $I->amGoingTo('try to login with admin credentials');
         $loginPage->login('Admin', 'admin&humhub@PASS%worD!');

@@ -13,6 +13,7 @@ Changelog
 - Enh #104: replace abandoned Google Auth library
 - Enh: Automated code refactoring for HumHub 1.18.0-beta.6 using Rector
 - Enh #105: Add optional help text on the 2FA check screen
+- Fix #106: Send a new email code after trusted IP changes in the same session
 
 1.2.0 (August 27, 2025)
 -----------------------

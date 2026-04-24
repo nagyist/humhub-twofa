@@ -51,8 +51,8 @@ class CheckController extends Controller
             $model->validate();
 
             if ($model->getFirstError('code') === CheckCode::ERROR_CODE_EXPIRED) {
-                Yii::$app->user->logout();
                 TwofaHelper::disableVerifying();
+                Yii::$app->user->logout();
                 Yii::$app->session->setFlash('error', Yii::t('TwofaModule.base', 'Two-factor authentication code is expired. Please try again.'));
 
                 return $this->refresh();
