@@ -142,11 +142,11 @@ class UserSettings extends Model
             return false;
         }
 
-        if ($this->driver !== GoogleAuthenticatorDriver::class) {
-            return TwofaHelper::setSetting(GoogleAuthenticatorDriver::RECOVERY_CODES_SETTING);
+        if ($this->driver !== GoogleAuthenticatorDriver::class && !TwofaHelper::setSetting(GoogleAuthenticatorDriver::RECOVERY_CODES_SETTING)) {
+            return false;
         }
 
-        return true;
+        return TwofaHelper::disableVerifying(!empty($this->driver));
     }
 
     /**
