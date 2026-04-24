@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.2.1 (Unreleased)
------------------------
+1.2.1 (April 24, 2026)
+----------------------
 - Fix #85: Use Return URL after code verification instead of redirecting to home
 - Enh #86: Improved Module Test GitHub Actions
 - Enh #87: Implemented `module-coding-standards`
