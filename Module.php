@@ -190,4 +190,12 @@ class Module extends BaseModule
     {
         return json_decode((string) $this->settings->get('trustedNetworks', '[]'));
     }
+
+    /**
+     * @return string
+     */
+    public function getHelpText(): string
+    {
+        return trim($this->settings->get('helpText', ''));
+    }
 }

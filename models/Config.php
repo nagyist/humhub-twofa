@@ -52,6 +52,11 @@ class Config extends Model
     public $trustedNetworks;
 
     /**
+     * @var string Optional help text for the 2FA verification screen
+     */
+    public $helpText;
+
+    /**
      * @inheritDoc
      */
     public function init()
@@ -66,6 +71,7 @@ class Config extends Model
         $this->enforcedGroups = $this->module->getEnforcedGroups();
         $this->enforcedMethod = $this->module->getEnforcedMethod();
         $this->trustedNetworks = implode(', ', $this->module->getTrustedNetworks());
+        $this->helpText = $this->module->getHelpText();
     }
 
     /**
@@ -81,6 +87,8 @@ class Config extends Model
             ['enforcedGroups', 'in', 'range' => array_keys($this->module->getGroupsOptions()), 'allowArray' => true],
             ['enforcedMethod', 'in', 'range' => array_keys($this->module->getDriversOptions())],
             ['trustedNetworks', 'string'],
+            ['helpText', 'string'],
+            ['helpText', 'filter', 'filter' => 'trim'],
         ];
     }
 
@@ -99,6 +107,7 @@ class Config extends Model
             'enforcedGroups' => Yii::t('TwofaModule.base', 'Mandatory for the following groups'),
             'enforcedMethod' => Yii::t('TwofaModule.base', 'Default method for the mandatory groups'),
             'trustedNetworks' => Yii::t('TwofaModule.base', 'Trusted networks list'),
+            'helpText' => Yii::t('TwofaModule.base', 'Help text'),
         ];
     }
 
@@ -118,6 +127,7 @@ class Config extends Model
         $this->module->settings->set('codeTtl', $this->codeTtl);
         $this->module->settings->set('rememberMeDays', $this->rememberMeDays);
         $this->module->settings->set('trustedNetworks', json_encode($this->getTrustedNetworksArray()));
+        $this->module->settings->set('helpText', $this->helpText);
 
         return true;
     }
