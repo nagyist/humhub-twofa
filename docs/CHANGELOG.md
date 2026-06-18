@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.2.2 (Unreleased)
-------------------
+1.2.2 (June 18, 2026)
+---------------------
 - Enh: Automated code refactoring for HumHub 1.18.0-beta.6 using Rector
 - Fix #109: Infinite loop of code verification when Push Notifications module is enabled
 - Fix #114: Fix redirect on check verification
