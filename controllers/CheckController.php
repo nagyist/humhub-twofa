@@ -39,7 +39,7 @@ class CheckController extends Controller
         $redirectUrl = Yii::$app->user->getReturnUrl();
 
         if (!TwofaHelper::isVerifyingRequired()) {
-            return $this->response->redirect($redirectUrl);
+            return $this->redirect($redirectUrl);
         }
 
         if (isset(Yii::$app->getModule('live')->isActive)) {
@@ -59,7 +59,7 @@ class CheckController extends Controller
             }
 
             if (!$model->hasErrors() && $model->save(false)) {
-                return $this->response->redirect($redirectUrl);
+                return $this->redirect($redirectUrl);
             }
         }
 
